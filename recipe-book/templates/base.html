@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}My Recipe Book{% endblock %}</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream:            '#FAF7F2',
+            parchment:        '#F0E8D9',
+            tan:              '#D4B896',
+            terracotta:       '#C1694F',
+            'terracotta-dark':'#A0533B',
+            'warm-brown':     '#5C3D2E',
+            'warm-gray':      '#8B7355',
+            'warm-gray-light':'#C4B49A',
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans:  ['Lato', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/custom.css" />
+
+  {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col bg-cream text-warm-brown">
+
+  <!-- Navigation -->
+  <nav class="bg-cream border-b border-tan sticky top-0 z-40 shadow-sm" x-data="{ open: false }">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="/" class="font-serif text-2xl font-bold text-warm-brown hover:text-terracotta transition-colors">
+        My Recipe Book
+      </a>
+
+      <!-- Desktop nav -->
+      <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+        <a href="/recipes" class="text-warm-gray hover:text-terracotta transition-colors py-1">All Recipes</a>
+        <a href="/recipes?category=Meals" class="text-warm-gray hover:text-terracotta transition-colors py-1">Meals</a>
+        <a href="/recipes?category=Snacks" class="text-warm-gray hover:text-terracotta transition-colors py-1">Snacks</a>
+        <a href="/recipes?category=Desserts" class="text-warm-gray hover:text-terracotta transition-colors py-1">Desserts</a>
+        <a href="/meal-plan" class="text-warm-gray hover:text-terracotta transition-colors py-1">Meal Plan</a>
+        <a href="/recipes/add"
+           class="bg-terracotta hover:bg-terracotta-dark text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+          + Add Recipe
+        </a>
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button @click="open = !open" class="md:hidden p-2 text-warm-gray hover:text-terracotta">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"/>
+          <path x-show="open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div x-show="open" x-cloak class="mobile-menu md:hidden flex flex-col gap-3 text-sm font-medium">
+      <a href="/recipes" @click="open=false" class="text-warm-gray hover:text-terracotta py-1">All Recipes</a>
+      <a href="/recipes?category=Meals" @click="open=false" class="text-warm-gray hover:text-terracotta py-1">Meals</a>
+      <a href="/recipes?category=Snacks" @click="open=false" class="text-warm-gray hover:text-terracotta py-1">Snacks</a>
+      <a href="/recipes?category=Desserts" @click="open=false" class="text-warm-gray hover:text-terracotta py-1">Desserts</a>
+      <a href="/meal-plan" @click="open=false" class="text-warm-gray hover:text-terracotta py-1">Meal Plan</a>
+      <a href="/recipes/add" @click="open=false"
+         class="bg-terracotta text-white text-center px-4 py-2 rounded-lg font-semibold">+ Add Recipe</a>
+    </div>
+  </nav>
+
+  <!-- Flash messages -->
+  {% if flashes %}
+  <div class="max-w-5xl mx-auto w-full px-4 pt-4" id="flash-container">
+    {% for flash in flashes %}
+    <div x-data="{ show: true }" x-show="show" x-cloak
+         x-init="setTimeout(() => show = false, 4000)"
+         class="flex items-center justify-between gap-3 mb-2 px-4 py-3 rounded-lg text-sm font-medium
+                {% if flash.category == 'info' %}bg-tan/40 text-warm-brown border border-tan
+                {% else %}bg-terracotta/10 text-terracotta-dark border border-terracotta/20{% endif %}">
+      <span>{{ flash.message }}</span>
+      <button @click="show = false" class="opacity-50 hover:opacity-100 transition-opacity">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Main content -->
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-parchment border-t border-tan mt-16">
+    <div class="max-w-5xl mx-auto px-4 py-6 text-center text-warm-gray text-sm">
+      <span class="font-serif font-semibold text-warm-brown">My Recipe Book</span>
+      &mdash; Your personal kitchen companion
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if active_category %}{{ active_category }}{% else %}All Recipes{% endif %} — My Recipe Book
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-10">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="font-serif text-4xl font-bold text-warm-brown">
+        {% if active_category %}{{ active_category }}{% else %}All Recipes{% endif %}
+      </h1>
+      <p class="text-warm-gray text-sm mt-1">{{ recipes|length }} recipe{{ 's' if recipes|length != 1 }}</p>
+    </div>
+    <a href="/recipes/add"
+       class="bg-terracotta hover:bg-terracotta-dark text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm">
+      + Add Recipe
+    </a>
+  </div>
+
+  <!-- Category filter tabs -->
+  <div class="flex flex-wrap gap-2 mb-8">
+    <a href="/recipes"
+       class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+              {% if not active_category %}bg-terracotta text-white{% else %}bg-parchment border border-tan text-warm-gray hover:text-terracotta{% endif %}">
+      All
+    </a>
+    <a href="/recipes?category=Meals"
+       class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+              {% if active_category == 'Meals' %}bg-terracotta text-white{% else %}bg-parchment border border-tan text-warm-gray hover:text-terracotta{% endif %}">
+      Meals
+    </a>
+    <a href="/recipes?category=Snacks"
+       class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+              {% if active_category == 'Snacks' %}bg-terracotta text-white{% else %}bg-parchment border border-tan text-warm-gray hover:text-terracotta{% endif %}">
+      Snacks
+    </a>
+    <a href="/recipes?category=Desserts"
+       class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+              {% if active_category == 'Desserts' %}bg-terracotta text-white{% else %}bg-parchment border border-tan text-warm-gray hover:text-terracotta{% endif %}">
+      Desserts
+    </a>
+  </div>
+
+  <!-- Recipe grid -->
+  {% if recipes %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for recipe in recipes %}
+      {% include "partials/recipe_card.html" %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- Empty state -->
+  <div class="bg-parchment border border-tan rounded-2xl p-12 text-center mt-4">
+    <div class="text-5xl mb-4">🔍</div>
+    <h2 class="font-serif text-xl font-semibold text-warm-brown mb-2">
+      No {{ active_category | lower if active_category else 'recipes' }} yet
+    </h2>
+    <p class="text-warm-gray text-sm mb-6">Be the first to add one.</p>
+    <a href="/recipes/add"
+       class="inline-block bg-terracotta hover:bg-terracotta-dark text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm">
+      + Add Recipe
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

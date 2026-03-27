@@ -1,0 +1,95 @@
+<div class="flex flex-col gap-1.5 h-full">
+
+  <!-- Filled state: shows badge + clear button (only after a successful save) -->
+  <div x-show="committed" class="flex items-start gap-1">
+    <a x-show="recipeId" :href="'/recipes/' + recipeId"
+       class="flex-1 text-xs font-medium text-terracotta hover:text-terracotta-dark leading-snug break-words"
+       x-text="recipeName"></a>
+    <span x-show="!recipeId"
+          class="flex-1 text-xs text-warm-brown leading-snug break-words"
+          x-text="customName"></span>
+    <button @click="clearSlot()"
+            class="text-warm-gray-light hover:text-terracotta transition-colors flex-shrink-0 mt-0.5"
+            title="Clear">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Input area (always in DOM, hidden after commit) -->
+  <div x-show="!committed" class="flex flex-col gap-1 flex-1">
+
+    <!-- Custom text input -->
+    <input
+      x-show="mode === 'custom'"
+      type="text"
+      x-model="customName"
+      @blur="customName.trim() && save()"
+      @keydown.enter.prevent="customName.trim() && save()"
+      maxlength="140"
+      placeholder="Add meal…"
+      class="w-full text-xs bg-transparent border-0 border-b border-tan focus:border-terracotta focus:ring-0 focus:outline-none text-warm-brown placeholder-warm-gray-light py-0.5 px-0"
+    />
+
+    <!-- Recipe search input + dropdown -->
+    <div x-show="mode === 'recipe'" class="relative">
+      <input
+        type="text"
+        x-model="searchQuery"
+        @input="searchRecipes()"
+        @keydown.escape="searchResults = []"
+        placeholder="Search recipes…"
+        class="w-full text-xs bg-transparent border-0 border-b border-tan focus:border-terracotta focus:ring-0 focus:outline-none text-warm-brown placeholder-warm-gray-light py-0.5 px-0"
+      />
+      <!-- Dropdown results -->
+      <div x-show="searchResults.length > 0" x-cloak class="slot-search-dropdown">
+        <template x-for="result in searchResults" :key="result.id">
+          <button
+            @click="selectRecipe(result.id, result.name)"
+            class="w-full text-left px-3 py-2 text-xs text-warm-brown hover:bg-parchment transition-colors border-b border-tan/30 last:border-0"
+            x-text="result.name">
+          </button>
+        </template>
+      </div>
+      <!-- Searching spinner -->
+      <svg x-show="searching" class="absolute right-0 top-0.5 w-3 h-3 animate-spin text-warm-gray" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+      </svg>
+    </div>
+
+  </div>
+
+  <!-- Bottom row: mode toggle + save state -->
+  <div class="flex items-center justify-between mt-auto pt-1">
+    <!-- Mode toggle pills -->
+    <div class="flex gap-0.5">
+      <button
+        @click="switchMode('custom')"
+        :class="mode === 'custom' ? 'bg-terracotta text-white' : 'text-warm-gray-light hover:text-warm-gray'"
+        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-colors leading-none">
+        Type
+      </button>
+      <button
+        @click="switchMode('recipe')"
+        :class="mode === 'recipe' ? 'bg-terracotta text-white' : 'text-warm-gray-light hover:text-warm-gray'"
+        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-colors leading-none">
+        Recipe
+      </button>
+    </div>
+
+    <!-- Save state indicator -->
+    <div class="flex items-center">
+      <svg x-show="saving" class="w-3 h-3 animate-spin text-warm-gray" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+      </svg>
+      <svg x-show="saved && !saving" class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+      </svg>
+      <span x-show="saveError && !saving" class="w-2 h-2 rounded-full bg-red-400 inline-block" title="Save failed"></span>
+    </div>
+  </div>
+
+</div>

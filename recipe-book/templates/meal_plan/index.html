@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}Meal Plan — My Recipe Book{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-10">
+
+  <!-- Page header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <h1 class="font-serif text-4xl font-bold text-warm-brown">Meal Plan</h1>
+
+    <!-- Week navigator -->
+    <div class="flex items-center gap-2 text-sm flex-wrap">
+      <a href="/meal-plan?week={{ prev_week }}"
+         class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-tan bg-parchment text-warm-gray hover:text-terracotta hover:border-terracotta transition-colors text-xs font-medium">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Prev
+      </a>
+      <span class="font-semibold text-warm-brown px-3 py-1.5 bg-parchment border border-tan rounded-lg text-sm">
+        {{ week_start | human_week }}
+      </span>
+      <a href="/meal-plan?week={{ next_week }}"
+         class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-tan bg-parchment text-warm-gray hover:text-terracotta hover:border-terracotta transition-colors text-xs font-medium">
+        Next
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </a>
+      <a href="/meal-plan"
+         class="text-terracotta hover:text-terracotta-dark text-xs font-medium px-2 py-1.5 transition-colors">
+        This Week
+      </a>
+    </div>
+  </div>
+
+  <!-- ── DESKTOP grid (lg+) ─────────────────────────────────────────────── -->
+  <div class="hidden lg:block border border-tan rounded-xl overflow-hidden">
+
+    <!-- Day header row -->
+    <div class="grid grid-cols-7 bg-parchment border-b border-tan">
+      {% for day in days %}
+      <div class="px-2 py-2.5 text-center {% if not loop.last %}border-r border-tan{% endif %}">
+        <p class="text-[10px] font-bold text-warm-gray uppercase tracking-wider">{{ day[:3] | title }}</p>
+        <p class="text-sm font-semibold text-warm-brown mt-0.5">{{ week_start | day_date(loop.index0) }}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Meal rows -->
+    {% for meal in meals %}
+    <div class="grid grid-cols-7 {% if not loop.last %}border-b border-tan{% endif %}">
+      {% for day in days %}
+      {% set slot = slots_map.get((day, meal)) %}
+      <div
+        class="p-2 min-h-[100px] flex flex-col bg-cream {% if not loop.last %}border-r border-tan{% endif %} relative"
+        x-data="mealSlot(
+          '{{ week_start }}',
+          '{{ day }}',
+          '{{ meal }}',
+          {{ slot.custom_name | tojson if slot and slot.custom_name else 'null' }},
+          {{ slot.recipe_id | tojson if slot and slot.recipe_id else 'null' }},
+          {{ slot.recipe.name | tojson if slot and slot.recipe else 'null' }}
+        )"
+      >
+        <!-- Meal label (only in first column of each row) -->
+        {% if loop.first %}
+        <span class="text-[9px] font-bold text-warm-gray-light uppercase tracking-widest mb-1.5 block">
+          {{ meal | title }}
+        </span>
+        {% else %}
+        <span class="mb-1.5 block h-3.5"></span>
+        {% endif %}
+
+        {% include "meal_plan/_slot.html" %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- ── MOBILE stacked cards (below lg) ───────────────────────────────── -->
+  <div class="lg:hidden space-y-4">
+    {% for day in days %}
+    <div class="bg-parchment border border-tan rounded-xl overflow-hidden">
+
+      <!-- Day header -->
+      <div class="px-4 py-2.5 bg-tan/20 border-b border-tan flex items-center gap-2">
+        <span class="font-serif font-bold text-warm-brown">{{ day | title }}</span>
+        <span class="text-warm-gray text-sm">{{ week_start | day_date(loop.index0) }}</span>
+      </div>
+
+      <!-- Meal slots -->
+      {% for meal in meals %}
+      {% set slot = slots_map.get((day, meal)) %}
+      <div
+        class="px-4 py-3 {% if not loop.last %}border-b border-tan/40{% endif %}"
+        x-data="mealSlot(
+          '{{ week_start }}',
+          '{{ day }}',
+          '{{ meal }}',
+          {{ slot.custom_name | tojson if slot and slot.custom_name else 'null' }},
+          {{ slot.recipe_id | tojson if slot and slot.recipe_id else 'null' }},
+          {{ slot.recipe.name | tojson if slot and slot.recipe else 'null' }}
+        )"
+      >
+        <p class="text-[10px] font-bold text-warm-gray uppercase tracking-wider mb-1.5">{{ meal | title }}</p>
+        {% include "meal_plan/_slot.html" %}
+      </div>
+      {% endfor %}
+
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<script>
+function mealSlot(weekStart, day, meal, initCustom, initRecipeId, initRecipeName) {
+  return {
+    weekStart,
+    day,
+    meal,
+    mode: initRecipeId ? 'recipe' : 'custom',
+    committed: !!(initCustom || initRecipeId),
+    customName: initCustom || '',
+    recipeId: initRecipeId,
+    recipeName: initRecipeName || '',
+    searchQuery: '',
+    searchResults: [],
+    searching: false,
+    saving: false,
+    saved: false,
+    saveError: false,
+    searchTimeout: null,
+
+    switchMode(newMode) {
+      this.mode = newMode;
+      if (newMode === 'custom') {
+        this.recipeId = null;
+        this.recipeName = '';
+        this.searchQuery = '';
+        this.searchResults = [];
+      } else {
+        this.customName = '';
+        this.searchQuery = '';
+        this.searchResults = [];
+      }
+    },
+
+    async save() {
+      this.saving = true;
+      this.saved = false;
+      this.saveError = false;
+      try {
+        const resp = await fetch('/api/meal-plan/slot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            week_start:  this.weekStart,
+            day_of_week: this.day,
+            meal_type:   this.meal,
+            custom_name: this.mode === 'custom' ? (this.customName.trim() || null) : null,
+            recipe_id:   this.mode === 'recipe' ? this.recipeId : null,
+          }),
+        });
+        const data = await resp.json();
+        if (data.ok) {
+          this.committed = true;
+          this.saved = true;
+          setTimeout(() => { this.saved = false; }, 2000);
+        } else {
+          this.saveError = true;
+        }
+      } catch {
+        this.saveError = true;
+      } finally {
+        this.saving = false;
+      }
+    },
+
+    async clearSlot() {
+      const params = new URLSearchParams({
+        week_start:  this.weekStart,
+        day_of_week: this.day,
+        meal_type:   this.meal,
+      });
+      await fetch('/api/meal-plan/slot?' + params.toString(), { method: 'DELETE' });
+      this.committed = false;
+      this.customName = '';
+      this.recipeId = null;
+      this.recipeName = '';
+      this.mode = 'custom';
+      this.searchQuery = '';
+      this.searchResults = [];
+    },
+
+    searchRecipes() {
+      clearTimeout(this.searchTimeout);
+      if (!this.searchQuery.trim()) {
+        this.searchResults = [];
+        return;
+      }
+      this.searchTimeout = setTimeout(async () => {
+        this.searching = true;
+        try {
+          const resp = await fetch('/api/recipes/search?q=' + encodeURIComponent(this.searchQuery));
+          this.searchResults = await resp.json();
+        } finally {
+          this.searching = false;
+        }
+      }, 250);
+    },
+
+    selectRecipe(id, name) {
+      this.recipeId = id;
+      this.recipeName = name;
+      this.searchResults = [];
+      this.searchQuery = '';
+      this.save();
+    },
+  };
+}
+</script>
+{% endblock %}

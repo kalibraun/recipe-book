@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}My Recipe Book{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="hero-bg py-16 px-4">
+  <div class="max-w-5xl mx-auto text-center">
+    <p class="text-terracotta text-sm font-semibold uppercase tracking-widest mb-3">Welcome back</p>
+    <h1 class="font-serif text-5xl md:text-6xl font-bold text-warm-brown leading-tight mb-4">
+      Your Personal<br/>Recipe Book
+    </h1>
+    <p class="text-warm-gray text-lg max-w-md mb-8 mx-auto">
+      Store, browse, and cook from your favourite recipes — all in one place.
+    </p>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href="/recipes"
+         class="bg-terracotta hover:bg-terracotta-dark text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+        Browse Recipes
+      </a>
+      <a href="/recipes/add"
+         class="border-2 border-terracotta text-terracotta hover:bg-terracotta hover:text-white
+                font-semibold px-6 py-3 rounded-lg transition-colors">
+        + Add Recipe
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Category cards -->
+<section class="max-w-5xl mx-auto px-4 py-12">
+  <h2 class="font-serif text-2xl font-semibold text-warm-brown mb-6">Browse by Category</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+    <a href="/recipes?category=Meals"
+       class="category-card bg-warm-brown text-cream rounded-xl p-6 shadow-sm hover:shadow-md no-underline">
+      <div class="text-4xl mb-3">🍽️</div>
+      <h3 class="font-serif text-xl font-semibold mb-1">Meals</h3>
+      <p class="text-cream/70 text-sm">
+        {{ category_counts.get('Meals', 0) }} recipe{{ 's' if category_counts.get('Meals', 0) != 1 }}
+      </p>
+    </a>
+
+    <a href="/recipes?category=Snacks"
+       class="category-card bg-tan text-warm-brown rounded-xl p-6 shadow-sm hover:shadow-md no-underline">
+      <div class="text-4xl mb-3">🥨</div>
+      <h3 class="font-serif text-xl font-semibold mb-1">Snacks</h3>
+      <p class="text-warm-brown/60 text-sm">
+        {{ category_counts.get('Snacks', 0) }} recipe{{ 's' if category_counts.get('Snacks', 0) != 1 }}
+      </p>
+    </a>
+
+    <a href="/recipes?category=Desserts"
+       class="category-card bg-terracotta text-cream rounded-xl p-6 shadow-sm hover:shadow-md no-underline">
+      <div class="text-4xl mb-3">🍰</div>
+      <h3 class="font-serif text-xl font-semibold mb-1">Desserts</h3>
+      <p class="text-cream/70 text-sm">
+        {{ category_counts.get('Desserts', 0) }} recipe{{ 's' if category_counts.get('Desserts', 0) != 1 }}
+      </p>
+    </a>
+
+  </div>
+</section>
+
+<!-- Recent recipes -->
+{% if recent_recipes %}
+<section class="max-w-5xl mx-auto px-4 pb-12">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="font-serif text-2xl font-semibold text-warm-brown">Recently Added</h2>
+    <a href="/recipes" class="text-terracotta text-sm font-semibold hover:underline">View all →</a>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for recipe in recent_recipes %}
+      {% include "partials/recipe_card.html" %}
+    {% endfor %}
+  </div>
+</section>
+{% else %}
+<!-- Empty state -->
+<section class="max-w-5xl mx-auto px-4 pb-12">
+  <div class="bg-parchment border border-tan rounded-2xl p-12 text-center">
+    <div class="text-6xl mb-4">📖</div>
+    <h2 class="font-serif text-2xl font-semibold text-warm-brown mb-2">Your book is empty</h2>
+    <p class="text-warm-gray mb-6">Add your first recipe to get started.</p>
+    <a href="/recipes/add"
+       class="inline-block bg-terracotta hover:bg-terracotta-dark text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+      + Add Your First Recipe
+    </a>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
