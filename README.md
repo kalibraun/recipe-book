@@ -1,4 +1,4 @@
-# 🍽️ Recipe Book
+# Recipe Book
 
 A personal recipe management web app with weekly meal planning, nutrition tracking, and URL scraping — built with FastAPI and a clean Jinja2 frontend.
 
