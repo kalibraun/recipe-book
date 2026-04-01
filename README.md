@@ -1,7 +1,7 @@
 # Recipe Book
 
 **Live Demo:** [https://recipe-book-livid-iota.vercel.app](https://recipe-book-livid-iota.vercel.app)
-A personal recipe management web app with weekly meal planning, nutrition tracking, and URL scraping — built with FastAPI and a clean Jinja2 frontend.
+A personal recipe management web app with weekly meal planning, nutrition tracking, and URL scraping built with FastAPI and a clean Jinja2 frontend.
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
